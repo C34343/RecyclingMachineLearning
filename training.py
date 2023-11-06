@@ -35,24 +35,37 @@ print('\ntrain_images.shape: {}, of {}'.format(train_images.shape, train_images.
 print('test_images.shape: {}, of {}'.format(test_images.shape, test_images.dtype))
 
 training = False
-epochs = 5
+new_model = True
+epochs = 100
 
 if training:
-  model = keras.Sequential([
-  keras.layers.Conv2D(input_shape=(28,28,1), filters=8, kernel_size=3, 
+  if new_model:
+    model = keras.Sequential([
+      keras.layers.Conv2D(input_shape=(28,28,1), filters=8, kernel_size=3, 
                       strides=2, activation='relu', name='Conv1'),
-  keras.layers.Flatten(),
-  keras.layers.Dense(128, activation='relu'),
-  keras.layers.Dropout(0.2),
-  keras.layers.Dense(10)
-  ])
-  model.summary()
+      keras.layers.Flatten(),
+      keras.layers.Dense(128, activation='relu'),
+      keras.layers.Dropout(0.4),
+      keras.layers.Dense(10)
+    ])
+    model.summary()
+
+  else:
+    version = 1
+    import_path = os.path.join(MODEL_DIR, str(version))
+    model = tf.keras.models.load_model(
+      import_path
+    )
 
 
   model.compile(optimizer='adam', 
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                 metrics=[keras.metrics.SparseCategoricalAccuracy()])
-  model.fit(train_images, train_labels, epochs=epochs)
+  
+  # callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
+  callback = tf.keras.callbacks.EarlyStopping(monitor='sparse_categorical_accuracy', patience=1)
+
+  model.fit(train_images, train_labels, epochs=epochs, callbacks=[callback])
 
   test_loss, test_acc = model.evaluate(test_images, test_labels)
   print('\nTest accuracy: {}'.format(test_acc))
@@ -77,13 +90,10 @@ if training:
 else:
   version = 1
   import_path = os.path.join(MODEL_DIR, str(version))
-  imported = tf.keras.models.load_model(
+  model = tf.keras.models.load_model(
     import_path
-    # custom_objects=None, 
-    # compile=True, 
-    # options=None
   )
 
-  test_loss, test_acc = imported.evaluate(test_images, test_labels)
+  test_loss, test_acc = model.evaluate(test_images, test_labels)
   print('\nTest accuracy: {}'.format(test_acc))
 
