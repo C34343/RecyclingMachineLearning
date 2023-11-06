@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 import sys
 
 # Confirm that we're using Python 3
@@ -7,10 +8,12 @@ import tensorflow as tf
 from tensorflow import keras
 
 # Helper libraries
-import numpy as np
-import matplotlib.pyplot as plt
+# import numpy as np
+# import matplotlib.pyplot as plt
 import os
-import subprocess
+# import subprocess
+
+MODEL_DIR = "C:/Users/Cbrock431/Documents/GitHub/MachineLearningTest"
 
 print('TensorFlow version: {}'.format(tf.__version__))
 
@@ -31,36 +34,37 @@ class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
 print('\ntrain_images.shape: {}, of {}'.format(train_images.shape, train_images.dtype))
 print('test_images.shape: {}, of {}'.format(test_images.shape, test_images.dtype))
 
-model = keras.Sequential([
+training = False
+epochs = 5
+
+if training:
+  model = keras.Sequential([
   keras.layers.Conv2D(input_shape=(28,28,1), filters=8, kernel_size=3, 
                       strides=2, activation='relu', name='Conv1'),
   keras.layers.Flatten(),
   keras.layers.Dense(128, activation='relu'),
   keras.layers.Dropout(0.2),
   keras.layers.Dense(10)
-])
-model.summary()
+  ])
+  model.summary()
 
-testing = False
-epochs = 5
 
-model.compile(optimizer='adam', 
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=[keras.metrics.SparseCategoricalAccuracy()])
-model.fit(train_images, train_labels, epochs=epochs)
+  model.compile(optimizer='adam', 
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                metrics=[keras.metrics.SparseCategoricalAccuracy()])
+  model.fit(train_images, train_labels, epochs=epochs)
 
-test_loss, test_acc = model.evaluate(test_images, test_labels)
-print('\nTest accuracy: {}'.format(test_acc))
+  test_loss, test_acc = model.evaluate(test_images, test_labels)
+  print('\nTest accuracy: {}'.format(test_acc))
 
-# Fetch the Keras session and save the model
-# The signature definition is defined by the input and output tensors,
-# and stored with the default serving key
-MODEL_DIR = "C:/Users/Cbrock431/Documents/GitHub/MachineLearningTest"
-version = 1
-export_path = os.path.join(MODEL_DIR, str(version))
-print('export_path = {}\n'.format(export_path))
+  # Fetch the Keras session and save the model
+  # The signature definition is defined by the input and output tensors,
+  # and stored with the default serving key
+  version = 1
+  export_path = os.path.join(MODEL_DIR, str(version))
+  print('export_path = {}\n'.format(export_path))
 
-tf.keras.models.save_model(
+  tf.keras.models.save_model(
     model,
     export_path,
     overwrite=True,
@@ -68,4 +72,18 @@ tf.keras.models.save_model(
     save_format=None,
     signatures=None,
     options=None
-)
+  )
+
+else:
+  version = 1
+  import_path = os.path.join(MODEL_DIR, str(version))
+  imported = tf.keras.models.load_model(
+    import_path
+    # custom_objects=None, 
+    # compile=True, 
+    # options=None
+  )
+
+  test_loss, test_acc = imported.evaluate(test_images, test_labels)
+  print('\nTest accuracy: {}'.format(test_acc))
+
