@@ -17,7 +17,7 @@ import os
 register_heif_opener()
 
 MODEL_DIR = "C:/Users/Cbrock431/Documents/GitHub/RecyclingMachineLearning"
-VERSION = 2
+VERSION = 3
 
 TRAINING = True
 NEW_MODEL = True
@@ -37,7 +37,7 @@ def openFolder(path, label):
     for filename in glob.glob(path + "/*" + ending):
       img = Image.open(filename)
       # img = img.convert('L')
-      img = img.resize((126, 168))
+      img = img.resize((252, 336))
       images.append(np.asarray(img))
       labels.append(label)
 
@@ -74,13 +74,13 @@ test_labels = np.append(test_labels, label3, axis=0)
 test_labels = np.append(test_labels, label4, axis=0)
 
 
-test_images, test_labels = shuffle(test_images, test_labels)
+# test_images, test_labels = shuffle(test_images, test_labels)
 
 # scale the values to 0.0 to 1.0
 test_images = test_images / 255.0
 
 # # reshape for feeding into the model
-test_images = test_images.reshape(test_images.shape[0], 126, 168, 3)
+test_images = test_images.reshape(test_images.shape[0], 252, 336, 3)
 
 class_names = ['Empty water bottle', 'Empty Pepsi bottle', 'Filled water bottle', 'Filled Pepsi bottle']
 
@@ -100,18 +100,18 @@ if TRAINING:
   train_labels = np.append(train_labels, label3, axis=0)
   train_labels = np.append(train_labels, label4, axis=0)
 
-  train_images, train_labels = shuffle(train_images, train_labels)
+  # train_images, train_labels = shuffle(train_images, train_labels)
 
   train_images = train_images / 255.0
 
-  train_images = train_images.reshape(train_images.shape[0], 126, 168, 3)
+  train_images = train_images.reshape(train_images.shape[0], 252, 336, 3)
 
   print('\ntrain_images.shape: {}, of {}'.format(train_images.shape, train_images.dtype))
 
   if NEW_MODEL:
     # TODO: Change stuff until a higher actual accuracy
     model = keras.Sequential([
-      keras.layers.Conv2D(input_shape=(126, 168, 3), filters=12, kernel_size=4, 
+      keras.layers.Conv2D(input_shape=(252, 336, 3), filters=12, kernel_size=4, 
                       strides=2, activation='relu', name='Conv1'),
       keras.layers.Flatten(),
       keras.layers.Dense(256, activation='relu'),
