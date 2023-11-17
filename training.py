@@ -17,11 +17,11 @@ import os
 register_heif_opener()
 
 MODEL_DIR = "C:/Users/Cbrock431/Documents/GitHub/RecyclingMachineLearning"
-VERSION = 3
+VERSION = 4
 
 TRAINING = True
 NEW_MODEL = True
-EPOCHS = 100
+EPOCHS = 15
 
 print('TensorFlow version: {}'.format(tf.__version__))
 
@@ -82,7 +82,7 @@ test_images = test_images / 255.0
 # # reshape for feeding into the model
 test_images = test_images.reshape(test_images.shape[0], 252, 336, 3)
 
-class_names = ['Empty water bottle', 'Empty Pepsi bottle', 'Filled water bottle', 'Filled Pepsi bottle']
+class_names = ['Empty bottle', 'Filled bottle']
 
 print('test_images.shape: {}, of {}'.format(test_images.shape, test_images.dtype))
 
@@ -116,6 +116,7 @@ if TRAINING:
       keras.layers.Flatten(),
       keras.layers.Dense(256, activation='relu'),
       keras.layers.Dense(256, activation='relu'),
+      keras.layers.BatchNormalization(synchronized=True),
       keras.layers.Dropout(0.2),
       keras.layers.Dense(2)
     ])
@@ -164,4 +165,3 @@ else:
 
   test_loss, test_acc = model.evaluate(test_images, test_labels)
   print('\nTest accuracy: {}'.format(test_acc))
-
